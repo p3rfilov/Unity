@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Scenes/05 - Frames per Second/05 - Frames per Second.unity
+- path: Assets/Scenes/06 - Persisting Objects/06 - Persisting Objects.unity
   isLoaded: 1
   isActive: 1
