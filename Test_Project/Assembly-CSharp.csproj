@@ -60,9 +60,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\FollwPlayer.cs" />
-    <Compile Include="Assets\Scripts\PlayerCollision.cs" />
-    <Compile Include="Assets\Scripts\PlayerMovement.cs" />
+    <Compile Include="Assets\Cube Game\Scripts\FollwPlayer.cs" />
+    <Compile Include="Assets\Cube Game\Scripts\PlayerCollision.cs" />
+    <Compile Include="Assets\Cube Game\Scripts\PlayerMovement.cs" />
+    <Compile Include="Assets\Follow\Scripts\GameManager.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>H:/Unity/Test_Project/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
