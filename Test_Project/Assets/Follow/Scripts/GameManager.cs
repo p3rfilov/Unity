@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class GameManager : MonoBehaviour
 
     private Transform[] allMinions;
     private Transform ballInstance;
+    private float respawnAlt = -500f;
 
     // Start is called before the first frame update
     void Start()
@@ -44,8 +46,15 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        // respawn minion/ball when it falls through
-
+        // respawn ball when it falls through
+        if (ballInstance.position.y < respawnAlt)
+        {
+            ballInstance.position = GetRandomGroundPosition();
+        }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
     }
 
     IEnumerator MoveMinion(Transform m)
@@ -54,15 +63,20 @@ public class GameManager : MonoBehaviour
         {
             yield return new WaitForSeconds(Random.Range(0f, moveFrequency));
             Vector3 behind = Vector3.Normalize(ballInstance.position - finish.position) * pushDistance;
+            float distanceToBall = Vector3.Distance(m.position, ballInstance.position + behind);
             Vector3 direction;
-            if (Vector3.Distance(m.position, ballInstance.position + behind) > pushDistance)
+            // respawn minion when it falls through
+            if (m.position.y < respawnAlt)
+            {
+                m.position = GetRandomGroundPosition();
+            }
+            else if (distanceToBall > pushDistance)
             {
                 if (Vector3.Distance(m.position, finish.position) < finishAvoidDistance)
                 {
                     // avoid the hole
                     direction = Quaternion.AngleAxis(90, Vector3.up) * Vector3.Normalize(m.position - finish.position);
                     m.GetComponent<Rigidbody>().AddForce(direction * force * Time.deltaTime, ForceMode.Impulse);
-                    yield return new WaitForSeconds(Random.Range(0f, moveFrequency));
                 }
                 if (Vector3.Distance(m.position, ballInstance.position) < pushDistance)
                     // if we are close to the ball but not behind it, move 90 degrees to the side
