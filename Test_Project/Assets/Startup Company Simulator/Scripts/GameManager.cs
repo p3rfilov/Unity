@@ -55,6 +55,7 @@ public class GameManager : MonoBehaviour
         // respawn ball when it falls through
         if (ballInstance.position.y < respawnAlt)
         {
+            ballInstance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             ballInstance.position = GetRandomGroundPosition();
         }
         if (Input.GetKeyDown(restartKey))
@@ -85,6 +86,7 @@ public class GameManager : MonoBehaviour
             // respawn minion when it falls through
             if (m.position.y < respawnAlt)
             {
+                m.GetComponent<Rigidbody>().velocity = Vector3.zero;
                 m.position = GetRandomGroundPosition();
             }
             else if (distanceToBall > pushDistance)
@@ -93,7 +95,7 @@ public class GameManager : MonoBehaviour
                 if (Vector3.Distance(m.position, finish.position) < avoidDistance)
                 {
                     direction = Quaternion.AngleAxis(90, Vector3.up) * Vector3.Normalize(m.position - finish.position);
-                    body.AddForce(minionJumpQuat * direction * force * Time.deltaTime, ForceMode.Impulse);
+                    body.AddForce(minionJumpQuat * direction * force * 2 * Time.deltaTime, ForceMode.Impulse);
                     yield return new WaitForSeconds(Random.Range(0f, moveFrequency));
                 }
 
@@ -107,7 +109,7 @@ public class GameManager : MonoBehaviour
 
                 if (ballToFinishDist > minionToFinishDist && Vector3.Distance(m.position, ballPos) < avoidDistance)
                     // if we are close to the ball but not behind it, move 90 degrees to the side
-                    direction = Quaternion.AngleAxis(90, Vector3.up) * Vector3.Normalize(ballPos - m.position);
+                    direction = Quaternion.AngleAxis(90, Vector3.up) * Vector3.Normalize(ballPos - m.position) + ballVelocity * inherentBallVelocity;
                 else
                     // when a minion is in position, start pushing the ball towards the hole
                     direction = Vector3.Normalize((ballPos + behindPos) - m.position);
