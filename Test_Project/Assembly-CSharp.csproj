@@ -63,6 +63,7 @@
     <Compile Include="Assets\Cube Game\Scripts\FollwPlayer.cs" />
     <Compile Include="Assets\Cube Game\Scripts\PlayerCollision.cs" />
     <Compile Include="Assets\Cube Game\Scripts\PlayerMovement.cs" />
+    <Compile Include="Assets\Startup Company Simulator\Scripts\DragAndDrop.cs" />
     <Compile Include="Assets\Startup Company Simulator\Scripts\GameManager.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>C:/Users/andrej.perfilov/Documents/Unity/Test_Project/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
