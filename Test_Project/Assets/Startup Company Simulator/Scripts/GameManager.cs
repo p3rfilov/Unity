@@ -14,13 +14,19 @@ public class GameManager : MonoBehaviour
     public float force;
     public float moveFrequency;
     public float pushDistance;
-    public float finishAvoidDistance;
+    public float avoidDistance;
+    public int jumpAngle;
+
+    private Vector3 ballPos;
+    private Vector3 ballVelocity;
+    private Vector3 behindPos;
+    private Vector3 velocityThreshold = new Vector3(0.0f, 0.0f, 0.0f);
 
     private Transform[] allMinions;
     private Transform ballInstance;
     private float respawnAlt = -500f;
+    private KeyCode restartKey = KeyCode.R;
 
-    // Start is called before the first frame update
     void Start()
     {
         allMinions = new Transform[minionCount];
@@ -43,7 +49,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
         // respawn ball when it falls through
@@ -51,10 +56,13 @@ public class GameManager : MonoBehaviour
         {
             ballInstance.position = GetRandomGroundPosition();
         }
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(restartKey))
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
+        ballPos = ballInstance.position;
+        ballVelocity = ballInstance.GetComponent<Rigidbody>().velocity;
+        behindPos = Vector3.Normalize(ballPos - finish.position) * pushDistance;
     }
 
     IEnumerator MoveMinion(Transform m)
@@ -62,9 +70,16 @@ public class GameManager : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(Random.Range(0f, moveFrequency));
-            Vector3 behind = Vector3.Normalize(ballInstance.position - finish.position) * pushDistance;
-            float distanceToBall = Vector3.Distance(m.position, ballInstance.position + behind);
+            yield return new WaitForFixedUpdate();
+
+            float distanceToBall = Vector3.Distance(m.position, ballPos + behindPos);
+            float thresholdDist = Vector3.Distance(Vector3.zero, velocityThreshold);
+            float velocityDist = Vector3.Distance(ballPos, ballPos + ballVelocity);
+            float ballToFinishDist = Vector3.Distance(ballPos, finish.position);
+            float minionToFinishDist = Vector3.Distance(m.position, finish.position);
+            Quaternion minionJumpQuat = Quaternion.AngleAxis(jumpAngle, Vector3.Cross(finish.position - m.position, Vector3.up));
             Vector3 direction;
+
             // respawn minion when it falls through
             if (m.position.y < respawnAlt)
             {
@@ -72,19 +87,29 @@ public class GameManager : MonoBehaviour
             }
             else if (distanceToBall > pushDistance)
             {
-                if (Vector3.Distance(m.position, finish.position) < finishAvoidDistance)
+                // avoid the hole
+                if (Vector3.Distance(m.position, finish.position) < avoidDistance)
                 {
-                    // avoid the hole
                     direction = Quaternion.AngleAxis(90, Vector3.up) * Vector3.Normalize(m.position - finish.position);
-                    m.GetComponent<Rigidbody>().AddForce(direction * force * Time.deltaTime, ForceMode.Impulse);
+                    m.GetComponent<Rigidbody>().AddForce(minionJumpQuat * direction * force * Time.deltaTime, ForceMode.Impulse);
+                    yield return new WaitForSeconds(Random.Range(0f, moveFrequency));
                 }
-                if (Vector3.Distance(m.position, ballInstance.position) < pushDistance)
+
+                // if the ball is fast-moving, try to intercept it
+                if (thresholdDist < velocityDist && ballToFinishDist > minionToFinishDist)
+                {
+                    direction = Vector3.Normalize(ballVelocity);
+                    m.GetComponent<Rigidbody>().AddForce(minionJumpQuat * direction * force * Time.deltaTime, ForceMode.Impulse);
+                    yield return new WaitForSeconds(Random.Range(0f, moveFrequency));
+                }
+
+                if (ballToFinishDist > minionToFinishDist && Vector3.Distance(m.position, ballPos) < avoidDistance)
                     // if we are close to the ball but not behind it, move 90 degrees to the side
-                    direction = Quaternion.AngleAxis(90, Vector3.up) * Vector3.Normalize(ballInstance.position - m.position);
+                    direction = Quaternion.AngleAxis(90, Vector3.up) * Vector3.Normalize(ballPos - m.position);
                 else
                     // when a minion is in position, start pushing the ball towards the hole
-                    direction = Vector3.Normalize((ballInstance.position + behind) - m.position);
-                m.GetComponent<Rigidbody>().AddForce(direction * force * Time.deltaTime, ForceMode.Impulse);
+                    direction = Vector3.Normalize((ballPos + behindPos) - m.position);
+                m.GetComponent<Rigidbody>().AddForce(minionJumpQuat * direction * force * Time.deltaTime, ForceMode.Impulse);
             }
         }
     }
