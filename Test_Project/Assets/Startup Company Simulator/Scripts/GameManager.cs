@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviour
 
     private Transform[] allMinions;
     private Transform ballInstance;
-    private float respawnAlt = -500f;
+    private float respawnAlt = -20f;
     private KeyCode restartKey = KeyCode.R;
 
     void Start()
@@ -57,6 +57,7 @@ public class GameManager : MonoBehaviour
         {
             ballInstance.GetComponent<Rigidbody>().velocity = Vector3.zero;
             ballInstance.position = GetRandomGroundPosition();
+            FindObjectOfType<Score>().IncrementScore();
         }
         if (Input.GetKeyDown(restartKey))
         {
@@ -88,6 +89,7 @@ public class GameManager : MonoBehaviour
             {
                 m.GetComponent<Rigidbody>().velocity = Vector3.zero;
                 m.position = GetRandomGroundPosition();
+                FindObjectOfType<Score>().IncrementDeaths();
             }
             else if (distanceToBall > pushDistance)
             {
