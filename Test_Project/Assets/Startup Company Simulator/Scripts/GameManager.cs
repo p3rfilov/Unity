@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
@@ -26,9 +27,31 @@ public class GameManager : MonoBehaviour
     private Transform[] allMinions;
     private Transform ballInstance;
     private float respawnAlt = -20f;
-    private KeyCode restartKey = KeyCode.R;
 
     void Start()
+    {
+        InitGameState();
+    }
+
+    void FixedUpdate()
+    {
+        if (ballInstance != null && allMinions.Length != 0)
+        {
+            // respawn ball when it falls through
+            if (ballInstance.position.y < respawnAlt)
+            {
+                ballInstance.GetComponent<Rigidbody>().velocity = Vector3.zero;
+                ballInstance.position = GetRandomGroundPosition();
+                FindObjectOfType<Score>().IncrementScore();
+            }
+ 
+            ballPos = ballInstance.position;
+            ballVelocity = ballInstance.GetComponent<Rigidbody>().velocity;
+            behindPos = Vector3.Normalize(ballPos - finish.position) * pushDistance;
+        }
+    }
+
+    void InitGameState()
     {
         allMinions = new Transform[minionCount];
         // spawn minions
@@ -50,22 +73,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
+    public void Restart()
     {
-        // respawn ball when it falls through
-        if (ballInstance.position.y < respawnAlt)
+        StopAllCoroutines();
+        Destroy(ballInstance.gameObject);
+        for (int i = 0; i < allMinions.Length; i++)
         {
-            ballInstance.GetComponent<Rigidbody>().velocity = Vector3.zero;
-            ballInstance.position = GetRandomGroundPosition();
-            FindObjectOfType<Score>().IncrementScore();
+            Destroy(allMinions[i].gameObject);
         }
-        if (Input.GetKeyDown(restartKey))
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
-        ballPos = ballInstance.position;
-        ballVelocity = ballInstance.GetComponent<Rigidbody>().velocity;
-        behindPos = Vector3.Normalize(ballPos - finish.position) * pushDistance;
+        FindObjectOfType<Score>().ResetScore();
+        InitGameState();
+    }
+
+    public void Quit()
+    {
+        Application.Quit();
+    }
+
+    public void ChangeMinionCount(Slider slider)
+    {
+        minionCount = (int)slider.value;
     }
 
     IEnumerator MoveMinion(Transform m)
@@ -111,7 +138,7 @@ public class GameManager : MonoBehaviour
 
                 if (ballToFinishDist > minionToFinishDist && Vector3.Distance(m.position, ballPos) < avoidDistance)
                     // if we are close to the ball but not behind it, move 90 degrees to the side
-                    direction = Quaternion.AngleAxis(90, Vector3.up) * Vector3.Normalize(ballPos - m.position) + ballVelocity * inherentBallVelocity;
+                    direction = Quaternion.AngleAxis(90, Vector3.up) * Vector3.Normalize(ballPos - m.position) + ballVelocity * 0.75f;
                 else
                     // when a minion is in position, start pushing the ball towards the hole
                     direction = Vector3.Normalize((ballPos + behindPos) - m.position);

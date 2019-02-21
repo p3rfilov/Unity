@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Startup Company Simulator/Startup Company Simulator.unity
+- path: Assets/Startup Company Simulator/Teamwork.unity
   isLoaded: 1
   isActive: 1

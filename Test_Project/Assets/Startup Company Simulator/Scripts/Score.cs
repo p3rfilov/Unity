@@ -38,4 +38,11 @@ public class Score : MonoBehaviour
     {
         deaths.text = (int.Parse(deaths.text) + 1).ToString();
     }
+
+    public void ResetScore()
+    {
+        timer = 0;
+        score.text = "0";
+        deaths.text = "0";
+    }
 }
