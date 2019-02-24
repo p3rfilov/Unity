@@ -1,4 +1,0 @@
-sceneSetups:
-- path: Assets/Startup Company Simulator/Teamwork.unity
-  isLoaded: 1
-  isActive: 1
