@@ -17,6 +17,7 @@ public class Game : MonoBehaviour
     {
         objects = new List<Transform>();
         savePath = Path.Combine(Application.persistentDataPath, "saveFile");
+        print(savePath);
     }
 
     private void Update()
@@ -61,13 +62,12 @@ public class Game : MonoBehaviour
     {
         using (var writer = new BinaryWriter(File.Open(savePath, FileMode.Create))) 
         {
-            writer.Write(objects.Count);
+            var dataWriter = new GameDataWriter(writer);
+            dataWriter.Write(objects.Count);
             for (int i = 0; i < objects.Count; i++)
             {
                 Transform t = objects[i];
-                writer.Write(t.localPosition.x);
-                writer.Write(t.localPosition.y);
-                writer.Write(t.localPosition.z);
+                dataWriter.Write(t.localPosition);
             }
         }
     }
@@ -77,13 +77,11 @@ public class Game : MonoBehaviour
         BeginNewGame();
         using (var reader = new BinaryReader(File.Open(savePath, FileMode.Open)))
         {
-            int count = reader.ReadInt32();
+            var dataReader = new GameDataReader(reader);
+            int count = dataReader.ReadInt();
             for (int i = 0; i < count; i++)
             {
-                Vector3 p;
-                p.x = reader.ReadSingle();
-                p.y = reader.ReadSingle();
-                p.z = reader.ReadSingle();
+                Vector3 p = dataReader.ReadVector3();
                 Transform t = Instantiate(prefab);
                 t.localPosition = p;
                 objects.Add(t);
