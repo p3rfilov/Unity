@@ -10,7 +10,7 @@ public class PersistableObject : MonoBehaviour
         writer.Write(transform.localScale);
     }
 
-    public virtual void Load(GameDataReader reader)
+    public virtual void Load (GameDataReader reader)
     {
         transform.localPosition = reader.ReadVector3();
         transform.localRotation = reader.ReadQuaternion();
