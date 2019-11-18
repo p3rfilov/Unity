@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using System.Collections.Generic;
 
 public class Game : PersistableObject
@@ -6,12 +7,18 @@ public class Game : PersistableObject
     public ShapeFactory shapeFactory;
     public PersistentStorage storage;
 
+    public float CreationSpeed { get; set; }
+    public float DestructionSpeed { get; set; }
+
     public KeyCode createKey = KeyCode.C;
     public KeyCode newGameKey = KeyCode.N;
     public KeyCode saveKey = KeyCode.S;
     public KeyCode loadKey = KeyCode.L;
+    public KeyCode destroyKey = KeyCode.X;
 
     const int saveVersion = 1;
+    float creationProgress;
+    float destructionProgress;
 
     List<Shape> shapes;
 
@@ -22,9 +29,27 @@ public class Game : PersistableObject
 
     private void Update ()
     {
+        creationProgress += Time.deltaTime * CreationSpeed;
+        while (creationProgress >= 1f)
+        {
+            creationProgress -= 1f;
+            CreateShape();
+        }
+
+        destructionProgress += Time.deltaTime * DestructionSpeed;
+        while (destructionProgress >= 1f)
+        {
+            destructionProgress -= 1f;
+            DestroyShape();
+        }
+
         if (Input.GetKeyDown(createKey))
         {
             CreateShape();
+        }
+        else if (Input.GetKeyDown(destroyKey))
+        {
+            DestroyShape();
         }
         else if (Input.GetKeyDown(newGameKey))
         {
@@ -56,11 +81,23 @@ public class Game : PersistableObject
         shapes.Add(instance);
     }
 
+    void DestroyShape ()
+    {
+        if (shapes.Count > 0)
+        {
+            int index = Random.Range(0, shapes.Count);
+            shapeFactory.Reclaim(shapes[index]);
+            int lastIndex = shapes.Count - 1;
+            shapes[index] = shapes[lastIndex];
+            shapes.RemoveAt(lastIndex);
+        }
+    }
+
     void BeginNewGame ()
     {
         for (int i = 0; i < shapes.Count; i++)
         {
-            Destroy(shapes[i].gameObject);
+            shapeFactory.Reclaim(shapes[i]);
         }
         shapes.Clear();
     }
