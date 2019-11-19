@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class Game : PersistableObject
 {
@@ -22,9 +23,21 @@ public class Game : PersistableObject
 
     List<Shape> shapes;
 
-    private void Awake ()
+    private void Start ()
     {
         shapes = new List<Shape>();
+
+        if (Application.isEditor)
+        {
+            Scene loadedLevel = SceneManager.GetSceneByName("Level 1");
+            if (loadedLevel.isLoaded)
+            {
+                SceneManager.SetActiveScene(loadedLevel);
+                return;
+            }
+        }
+
+        StartCoroutine(LoadLevel());
     }
 
     private void Update ()
@@ -100,6 +113,14 @@ public class Game : PersistableObject
             shapeFactory.Reclaim(shapes[i]);
         }
         shapes.Clear();
+    }
+
+    IEnumerator LoadLevel ()
+    {
+        this.enabled = false;
+        yield return SceneManager.LoadSceneAsync("Level 1", LoadSceneMode.Additive);
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName("Level 1"));
+        this.enabled = true;
     }
 
     public override void Save (GameDataWriter writer)
