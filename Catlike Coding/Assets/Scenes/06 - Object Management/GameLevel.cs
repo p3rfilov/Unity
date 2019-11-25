@@ -2,13 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameLevel : MonoBehaviour
+public class GameLevel : PersistableObject
 {
 
     [SerializeField] SpawnZone spawnZone;
 
-    void Start ()
+    public static GameLevel Current { get; private set; }
+
+    private void OnEnable ()
     {
-        Game.Instance.SpawnZoneOfLevel = spawnZone;
+        Current = this;
     }
+
+    public Vector3 SpawnPoint
+    {
+        get
+        {
+            return spawnZone.SpawnPoint;
+        }
+    }
+
+    public override void Save (GameDataWriter writer) { }
+
+    public override void Load (GameDataReader reader) { }
 }

@@ -290,6 +290,7 @@ MonoBehaviour:
   - {fileID: 265866528}
   - {fileID: 2037312451}
   - {fileID: 1470171105}
+  sequential: 1
 --- !u!4 &779634127
 Transform:
   m_ObjectHideFlags: 0
