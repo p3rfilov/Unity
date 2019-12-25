@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class Game : PersistableObject
 {
     [SerializeField] FloatRange testRange;  // non-functional test field
+    [SerializeField] ColorRangeHSV testColorRange;  // non-functional test field
 
     [SerializeField] ShapeFactory shapeFactory;
     [SerializeField] PersistentStorage storage;
